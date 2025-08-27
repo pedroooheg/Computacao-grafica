@@ -1,7 +1,7 @@
 #include <iostream>
 #include <GL/glew.h>
 #include <GLFW//glfw3.h>
-
+#include <cstdlib>
 using namespace std;
 
 const GLint WIDTH = 800, HEIGHT = 600;
@@ -35,10 +35,10 @@ static const char* fragmentShader = "                                           
 #version 330                                                                               \n\
                                                                                            \n\
 // diferente da entrada por layout, uniform é uma entrada em tempo de execução             \n\
-uniform in vec3 triColor;																   \n\
-                                                                                           \n\
+uniform  vec3 triColor;																       \n\
+out vec4 color;                                                                            \n\
 void main() {                                                                              \n\
-	color = vec3(triColor, 1.0);                                                           \n\
+	color = vec4(triColor, 1.0);                                                           \n\
 }                                                                                          \n\
 ";
 
@@ -130,7 +130,7 @@ int main() {
 	glfwMakeContextCurrent(window); // tornando essa janela como principal
 
 	//iniciando o Glew
-	glewExperimental = GLU_TRUE;
+	glewExperimental = GL_TRUE;
 	if (glewInit() != GLEW_OK) {
 		cout << "Erro: não foi possível iniciar o glew";
 		glfwDestroyWindow(window);
@@ -139,11 +139,34 @@ int main() {
 	}
 
 	glViewport(0, 0, bufferWidth, bufferHeight);
+	create_triangle();
+	add_program();
 
 	while (!glfwWindowShouldClose(window)) {
-		glClearColor(0.0f, 1.0f, 1.0f, 1.0f);
+		//cor de fundo da janela
+		glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
 		glfwPollEvents();
 		glClear(GL_COLOR_BUFFER_BIT);
+
+		//renderizando o triangulo
+		
+		
+		GLint uniformColor = glGetUniformLocation(shaderProgram, "triColor");
+		std::srand(std::time(nullptr));
+		int intr = std::rand();
+		float r = static_cast<float>(intr) / static_cast<float>(RAND_MAX); 
+		float g = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX); 
+		float b = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+
+		glUniform3f(uniformColor, r, g, b);
+
+		glUseProgram(shaderProgram);
+		glBindVertexArray(VAO);
+			glDrawArrays(GL_TRIANGLES, 0, 3); //Triangulo comecando na pos 0, num de ponto 3
+		glBindVertexArray(0);
+		//altera cor do triangulo
+
+		
 		glfwSwapBuffers(window);
 	}
 
