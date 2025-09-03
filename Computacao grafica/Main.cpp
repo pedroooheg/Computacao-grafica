@@ -1,9 +1,11 @@
 #include <iostream>
 #include <GL/glew.h>
 #include <GLFW//glfw3.h>
+
 #include <glm\glm.hpp>
 #include <glm\gtc\matrix_transform.hpp>
 #include <glm\gtc\type_ptr.hpp>
+
 using namespace std;
 
 const GLint WIDTH = 800, HEIGHT = 600;
@@ -15,19 +17,21 @@ GLuint VAO, VBO, shaderProgram;
 
 float toRadians = 3.1415f / 180.0f;
 
-bool direction = false, directionY = false;
+bool direction = false, directionSize = false;
 float triOffset = 0.0f, triOffsetMax = 0.7f, triOffsetMin = -0.7f, triIncrement = 0.01f;
-float triOffsetY = 0.0f, triOffsetMaxY = 0.7f, triOffsetMinY = -0.7f, triIncrementY = 0.01f;
+float triOffsetSize = 0.2f, triOffsetSizeMax = 1.2f, triOffsetSizeMin = 0.2f, triOffsetSizeIncrement = 0.01f;
+float triCurrentAngle = 0.0f, triAngleIncrement = 1.0f;
+
 // aqui estamos fazendo um programa (shader) em GLSL
 
 // shader para renderizar pontos na tela
 static const char* vertexShader = "                                                        \n\
 #version 330                                                                               \n\
 layout(location=0) in vec2 pos;                                                            \n\
-uniform float posX;                                                                        \n\
-uniform float posY;                                                                        \n\
+uniform mat4 model;                                                                        \n\
+                                                                                           \n\
 void main() {                                                                              \n\
-	gl_Position = vec4(pos.x + posX, posY, 0.0, 1.0);                                     \n\
+	gl_Position = model * vec4(pos.x, pos.y, 0.0, 1.0);                                    \n\
 }                                                                                          \n\
 ";
 
@@ -154,41 +158,39 @@ int main() {
 		GLint uniformColor = glGetUniformLocation(shaderProgram, "triColor");
 		glUniform3f(uniformColor, 1.0f, 1.0f, 0.0f);
 
-
 		//Movimenta o triangulo
-		if (!direction) {
+		if (!direction)
 			triOffset += triIncrement;
-		}
-		else {
+		else
 			triOffset -= triIncrement;
-		}
-
 		if (triOffset > triOffsetMax || triOffset < triOffsetMin)
 			direction = !direction;
 
+		triCurrentAngle += triAngleIncrement;
+		if (triCurrentAngle >= 360)
+			triCurrentAngle = 0;
+
+		if (!directionSize)
+			triOffsetSize += triOffsetSizeIncrement;
+		else
+			triOffsetSize -= triOffsetSizeIncrement;
+		if (triOffsetSize > triOffsetSizeMax || triOffsetSize < triOffsetSizeMin)
+			directionSize = !directionSize;
+
+		GLint uniformModel = glGetUniformLocation(shaderProgram, "model");
+		glm::mat4 model(1.0f);
+
+		//model = glm::translate(model, glm::vec3(triOffset, 0.0f, 0.0f));
+		//model = glm::scale(model, glm::vec3(triOffsetSize, triOffsetSize, 0.0f));
+		model = glm::rotate(model,triCurrentAngle * toRadians, glm::vec3(1.0f, 1.0f, 1.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 
 
-		if (!directionY) {
-			triOffsetY += triIncrementY;
-		}
-		else {
-			triOffsetY -= triIncrementY;
-		}
-
-		if (triOffsetY > triOffsetMaxY || triOffsetY < triOffsetMinY)
-			directionY = !directionY;
-
-		GLint uniformPosX = glGetUniformLocation(shaderProgram, "posX");
-		glUniform1f(uniformPosX, triOffset);
-
-		GLint uniformPosY = glGetUniformLocation(shaderProgram, "posY");
-		glUniform1f(uniformPosY, triOffsetY);
 		//Desenhando o triangulo
 		glUseProgram(shaderProgram);
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 3); //Tringulo, começando na posição 0, Numero de pontos 3
 		glBindVertexArray(0);
-
 
 		glfwSwapBuffers(window);
 	}
