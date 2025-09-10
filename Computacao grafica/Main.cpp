@@ -27,30 +27,32 @@ float triCurrentAngle = 0.0f, triAngleIncrement = 1.0f;
 // shader para renderizar pontos na tela
 static const char* vertexShader = "                                                        \n\
 #version 330                                                                               \n\
-layout(location=0) in vec2 pos;                                                            \n\
+layout(location=0) in vec3 pos;                                                            \n\
 uniform mat4 model;                                                                        \n\
-                                                                                           \n\
+out vec4 vCol;                                                                             \n\
 void main() {                                                                              \n\
-	gl_Position = model * vec4(pos.x, pos.y, 0.0, 1.0);                                    \n\
+	gl_Position = model * vec4(pos, 1.0f);                                                  \n\
+    vCol = vec4(clamp(pos, 0.0f, 1.0f), 1.0f);                                                                                  \n\
 }                                                                                          \n\
 ";
 
 static const char* fragmentShader = "                                                      \n\
 #version 330                                                                               \n\
+in vec4 vCol;                                                                             \n\
                                                                                            \n\
 uniform vec3 triColor;																       \n\
 out vec4 color;                                                                            \n\
                                                                                            \n\
 void main() {                                                                              \n\
-	color = vec4(triColor, 1.0);                                                           \n\
+	color = vCol;                                                         \n\
 }                                                                                          \n\
 ";
 
 void create_triangle() {
 	GLfloat vertices[] = { // nosso buffer de vertíces
-		0.0f, 1.0f, // vertice 1 
-		-1.0f, -1.0f, // vertice 2
-		1.0f, -1.0f // vertice 3
+		0.0f, 1.0f, 0.0f,// vertice 1 
+		-1.0f, -1.0f, 0.0f, // vertice 2
+		1.0f, -1.0f, 0.0f, // vertice 3
 	};
 
 	// iniciar um VAO
@@ -66,7 +68,7 @@ void create_triangle() {
 	glGenBuffers(1, &VBO); // alocar um buffer
 	glBindBuffer(GL_ARRAY_BUFFER, VBO); // a partir desse momento estamos modificando esse buffer
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); // explicando onde estão os dados
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0); // explicando como interpretar esses dados
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0); // explicando como interpretar esses dados
 	glEnableVertexAttribArray(0);  // location
 
 	// deixar de apontar para o VAO e VBO
