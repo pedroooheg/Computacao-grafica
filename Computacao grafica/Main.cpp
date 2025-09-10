@@ -29,22 +29,23 @@ static const char* vertexShader = "                                             
 #version 330                                                                               \n\
 layout(location=0) in vec3 pos;                                                            \n\
 uniform mat4 model;                                                                        \n\
+uniform mat4 projection;                                                                   \n\
 out vec4 vCol;                                                                             \n\
 void main() {                                                                              \n\
-	gl_Position = model * vec4(pos, 1.0f);                                                  \n\
+	gl_Position = projection * model *  vec4(pos, 1.0f);                                   \n\
     vCol = vec4(clamp(pos, 0.0f, 1.0f), 1.0f);                                                                                  \n\
 }                                                                                          \n\
 ";
 
 static const char* fragmentShader = "                                                      \n\
 #version 330                                                                               \n\
-in vec4 vCol;                                                                             \n\
+in vec4 vCol;                                                                              \n\
                                                                                            \n\
 uniform vec3 triColor;																       \n\
 out vec4 color;                                                                            \n\
                                                                                            \n\
 void main() {                                                                              \n\
-	color = vCol;                                                         \n\
+	color = vCol;                                                                          \n\
 }                                                                                          \n\
 ";
 
@@ -165,6 +166,11 @@ int main() {
 	create_triangle();
 	add_program();
 
+	glm::mat4 projection = glm::perspective(45.0f,
+							(GLfloat)bufferWidth/(GLfloat)bufferHeight,
+							0.0f,
+							100.0f);
+
 	while (!glfwWindowShouldClose(window)) {
 		//Cor de fundo da janela
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -195,16 +201,20 @@ int main() {
 			directionSize = !directionSize;
 
 		GLint uniformModel = glGetUniformLocation(shaderProgram, "model");
+		GLint uniformProjection = glGetUniformLocation(shaderProgram, "projection");
 		glm::mat4 model(1.0f);
 
-		//model = glm::translate(model, glm::vec3(triOffset, 0.0f, 0.0f));
-		//model = glm::scale(model, glm::vec3(triOffsetSize, triOffsetSize, 0.0f));
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, -2.5f));
+		model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
 		model = glm::rotate(model,triCurrentAngle * toRadians, glm::vec3(1.0f, 1.0f, 1.0f));
+
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
 
 
 		//Desenhando o triangulo
 		glUseProgram(shaderProgram);
+
 		glBindVertexArray(VAO);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
 				glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
