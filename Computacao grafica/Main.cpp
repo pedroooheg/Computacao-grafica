@@ -13,7 +13,7 @@ const GLint WIDTH = 800, HEIGHT = 600;
 // VBO é o ponteiro para os meus dados brutos, são os dados do objeto a ser representado pelo VAO 
 // shaderProgram é qual programa estou rodando 
 // todo programa pode ser chamado de shader
-GLuint VAO, VBO, shaderProgram;
+GLuint VAO, VBO, IBO,shaderProgram;
 
 float toRadians = 3.1415f / 180.0f;
 
@@ -49,10 +49,20 @@ void main() {                                                                   
 ";
 
 void create_triangle() {
+
+	unsigned int indices[] = {
+		0,1,2,  //Base
+		0,1,3,  //lado1
+		0,2,3,  //lado2
+		1,2,3   //frente
+	};
+
+	
 	GLfloat vertices[] = { // nosso buffer de vertíces
 		0.0f, 1.0f, 0.0f,// vertice 1 
 		-1.0f, -1.0f, 0.0f, // vertice 2
 		1.0f, -1.0f, 0.0f, // vertice 3
+		0.0f, 0.0f, 1.0f // vertice 4
 	};
 
 	// iniciar um VAO
@@ -63,6 +73,11 @@ void create_triangle() {
 	// estamos dizendo que a partir desse momento todas as alterações serão feitas nesse espaço de memória
 	// agora tudo o que vamos criar será nesse espaço de memória como os pontos da nossa tela
 	glBindVertexArray(VAO);
+
+	glGenBuffers(1, &IBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
 
 
 	glGenBuffers(1, &VBO); // alocar um buffer
@@ -152,7 +167,7 @@ int main() {
 
 	while (!glfwWindowShouldClose(window)) {
 		//Cor de fundo da janela
-		glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		glfwPollEvents();
 		glClear(GL_COLOR_BUFFER_BIT);
 
@@ -191,8 +206,12 @@ int main() {
 		//Desenhando o triangulo
 		glUseProgram(shaderProgram);
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 3); //Tringulo, começando na posição 0, Numero de pontos 3
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+				glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
+		//glDrawArrays(GL_TRIANGLES, 0, 3); //Tringulo, começando na posição 0, Numero de pontos 3
+		//glBindVertexArray(0);
 
 		glfwSwapBuffers(window);
 	}
