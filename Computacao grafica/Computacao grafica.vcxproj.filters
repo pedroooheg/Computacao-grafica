@@ -16,9 +16,6 @@
     <Filter Include="Arquivos de Origem\Class">
       <UniqueIdentifier>{c25299a4-5767-448a-a574-2075b7641fee}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Textures">
-      <UniqueIdentifier>{0fa79d69-8f2d-458e-81c1-8d43061593b9}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Shaders">
       <UniqueIdentifier>{64dc4e6c-89d2-463d-aaa6-deb6c6e3b2cd}</UniqueIdentifier>
     </Filter>
@@ -42,17 +39,11 @@
     <ClCompile Include="Window.cpp">
       <Filter>Arquivos de Origem\Class</Filter>
     </ClCompile>
-    <ClCompile Include="Camera.cpp">
+    <ClCompile Include="Source.cpp" />
+    <ClCompile Include="Texture.cpp">
       <Filter>Arquivos de Origem\Class</Filter>
     </ClCompile>
-    <ClCompile Include="Camera.h">
-      <Filter>Arquivos de Cabeçalho</Filter>
-    </ClCompile>
-    <ClCompile Include="Source.cpp" />
-    <ClCompile Include="FileName.cpp">
-      <Filter>Textures</Filter>
-    </ClCompile>
-    <ClCompile Include="Texture.cpp">
+    <ClCompile Include="Camera.cpp">
       <Filter>Arquivos de Origem\Class</Filter>
     </ClCompile>
   </ItemGroup>
@@ -73,6 +64,9 @@
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
     <ClInclude Include="Texture.h">
+      <Filter>Arquivos de Cabeçalho</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
   </ItemGroup>

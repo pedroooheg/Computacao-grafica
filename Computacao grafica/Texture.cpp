@@ -8,7 +8,7 @@ Texture::Texture() {
 	fileLocation = NULL;
 }
 
-Texture::Texture(char* fileLoc) {
+Texture::Texture(char *fileLoc) {
 	textureID = 0;
 	width = 0;
 	height = 0;
