@@ -32,25 +32,35 @@ static const char* fragmentLocation = "./Shaders/FragmentShader.glsl";
 
 void CreateTriangle() {
 	GLfloat vertices[] = {
-		0.0f, 1.0f, 0.0f,	0.5f, 1.0f,  //Vértice 0 (x,y,z, u,v)
-		1.0f, 1.0f, 0.0f,	1.0f, 0.0f,  //Vértice 1 (x,y,z, u,v)
-		1.0f, 1.0f, 0.0f,   0.0f, 0.0f,  //Vértice 2 (x,y,z, u,v)
-		1.0f, 1.0f, 1.0f,	0.5f, 0.0f,   //Vértice 3 (x,y,z, u,v)
+		0.0f, 1.0f, 0.0f,	0.0f, 1.0f,  //Vértice 0 (x,y,z, u,v)
+		1.0f, 1.0f, 0.0f,	1.0f, 1.0f,  //Vértice 1 (x,y,z, u,v)
+		0.0f, 1.0f, 1.0f,   0.0f, 0.0f,  //Vértice 2 (x,y,z, u,v)
+		1.0f, 1.0f, 1.0f,	1.0f, 0.0f,   //Vértice 3 (x,y,z, u,v)
 
-
+		0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+		1.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+		1.0f, 0.0f, 0.0f, 0.0f, 1.0f
 
 	};
 
 	unsigned int indices[] = {
-		0,1,2, //Frente da pirâmide
-		1,2,3, //Parede lateral direita
+		0,1,2,
+		1,2,3,
+		2,3,4,
+		3,4,5,
+		2,4,0,
+		0,4,6,
+		1,3,7,
+		1,5,7
+
 
 	};
 
 	GLfloat floorVertices[] = {
-		-10.0f, -5.0f, -10.0f, 0.0f, 10.0f,
-		 10.0f, -5.0f, -10.0f, 10.0f, 10.0f,
-		 10.0f, -5.0f,  10.0f, 10.0f, 0.0f,
+		-10.0f, -5.0f, -10.0f, 0.0f, 1.0f,
+		 10.0f, -5.0f, -10.0f, 1.0f, 1.0f,
+		 10.0f, -5.0f,  10.0f, 1.0f, 0.0f,
 		-10.0f, -5.0f,  10.0f, 0.0f, 0.0f
 	};
 
