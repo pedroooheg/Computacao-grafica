@@ -14,12 +14,14 @@
 #include "Shader.h"
 #include "Window.h"
 #include "Camera.h"
-#include "texture.h"
+#include "Texture.h"
+#include "Light.h"
 
 std::vector<Mesh*> meshList;
 std::vector<Shader> shaderList;
 Window mainWindow;
 Camera camera;
+Light mainLight;
 
 Texture brickTexture;
 Texture dirtTexture;
@@ -32,41 +34,17 @@ static const char* fragmentLocation = "./Shaders/FragmentShader.glsl";
 
 void CreateTriangle() {
 	GLfloat vertices[] = {
-		0.0f, 1.0f, 0.0f,	0.0f, 1.0f,  //Vértice 0 (x,y,z, u,v)
-		1.0f, 1.0f, 0.0f,	1.0f, 1.0f,  //Vértice 1 (x,y,z, u,v)
-		0.0f, 1.0f, 1.0f,   0.0f, 0.0f,  //Vértice 2 (x,y,z, u,v)
-		1.0f, 1.0f, 1.0f,	1.0f, 0.0f,   //Vértice 3 (x,y,z, u,v)
-
-		0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-		1.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-		0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-		1.0f, 0.0f, 0.0f, 0.0f, 1.0f
-
+		0.0f, 1.0f, 0.0f,	0.5f, 1.0f,	//Vértice 0 (x,y,z, u,v)
+		1.0f, -1.0f, 0.0f,	1.0f, 0.0f,	//Vértice 1 (x,y,z, u,v)
+		-1.0f, -1.0f, 0.0f,	0.0f, 0.0f, //Vértice 2 (x,y,z, u,v)
+		0.0f, -1.0f, 1.0f,	0.5f, 0.0f	//Vértice 3 (x,y,z, u,v)
 	};
 
 	unsigned int indices[] = {
-		0,1,2,
-		1,2,3,
-		2,3,4,
-		3,4,5,
-		2,4,0,
-		0,4,6,
-		1,3,7,
-		1,5,7
-
-
-	};
-
-	GLfloat floorVertices[] = {
-		-10.0f, -5.0f, -10.0f, 0.0f, 1.0f,
-		 10.0f, -5.0f, -10.0f, 1.0f, 1.0f,
-		 10.0f, -5.0f,  10.0f, 1.0f, 0.0f,
-		-10.0f, -5.0f,  10.0f, 0.0f, 0.0f
-	};
-
-	unsigned int floorIndices[] = {
-		0, 1, 2,
-		0, 2, 3
+		0,1,2, //Frente da pirâmide
+		0,1,3, //Parede lateral direita
+		0,2,3, //Parede lateral esquerda
+		1,2,3  //Base da pirâmide
 	};
 
 	Mesh* obj1 = new Mesh();
@@ -76,16 +54,6 @@ void CreateTriangle() {
 	Mesh* obj2 = new Mesh();
 	obj2->CreateMesh(vertices, indices, sizeof(vertices), sizeof(indices));
 	meshList.push_back(obj2);
-
-	Mesh* obj3 = new Mesh();
-	obj3->CreateMesh(floorVertices, floorIndices, sizeof(floorVertices), sizeof(floorIndices));
-	meshList.push_back(obj3);
-
-	Mesh* obj4 = new Mesh();
-	obj4->CreateMesh(floorVertices, floorIndices, sizeof(floorVertices), sizeof(floorIndices));
-	meshList.push_back(obj3);
-
-
 }
 
 void CreateShader() {
@@ -104,12 +72,15 @@ int main() {
 
 	camera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f, 5.0f, 8.0f);
 	
-	//Carrega as Textures
-	brickTexture = Texture((char*)("Textures/brick.png"));
+	//Carrega as texturas
+	brickTexture = Texture((char*) ("Textures/brick.png"));
 	brickTexture.loadTexture();
 	dirtTexture = Texture((char*)("Textures/dirt.png"));
 	dirtTexture.loadTexture();
 	
+	//Iluminação
+	mainLight = Light(1.0f, 0.0f, 0.0f, 0.8f);
+
 	glm::mat4 projection = glm::perspective(1.0f, mainWindow.getBufferWidth() / mainWindow.getBufferHeight(), 0.1f, 100.0f);
 
 	while (!mainWindow.getWindowShouldClose()) {
@@ -139,6 +110,11 @@ int main() {
 		glUniformMatrix4fv(shaderList[0].getUniformView(), 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()));
 		
 			/********************************
+			* Light
+			*********************************/
+			mainLight.useLight(shaderList[0].getUniformAmbientIntensity(), shaderList[0].getUniformAmbientColor());
+
+			/********************************
 			* Piramide 1
 			*********************************/
 			glm::mat4 model(1.0f); //cria uma matriz 4x4 e coloca os valores 1.0f em todas as posições
@@ -158,15 +134,6 @@ int main() {
 			glUniformMatrix4fv(shaderList[0].getUniformModel(), 1, GL_FALSE, glm::value_ptr(model));
 			dirtTexture.useTexture();
 			meshList[1]->RenderMesh();
-
-
-			model = glm::mat4(1.0f); //cria uma matriz 4x4 colocando 1.0f em cada uma das posições
-			model = glm::translate(model, glm::vec3(0.0f, 0.75f, -2.5f)); //traduz o modelo para movimentar a posição (x,y,z)
-			model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
-			glUniformMatrix4fv(shaderList[0].getUniformModel(), 1, GL_FALSE, glm::value_ptr(model));
-			dirtTexture.useTexture();
-			meshList[2]->RenderMesh();
-
 		
 		glUseProgram(0); //Removo o Programa da memória
 
